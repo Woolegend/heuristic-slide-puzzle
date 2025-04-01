@@ -28,7 +28,7 @@ int cord[17][2] = {{3,3},{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{
 // 보드를 선택하기 위한 함수
 // 선택된 보드의 번호는 전역변수 sb에 저장된다
 void selectBoard() {
-	printf("Board level : 1 ~ 6\n");
+	printf("Board level : 1 ~ 8\n");
 	printf("> ");
 	scanf("%d", &sb);
 	printf("\n");
@@ -56,7 +56,10 @@ void selectHeuristic() {
 	printf("1. Miss Match\n");
 	printf("2. Euclidean Distance\n");
 	printf("3. Manhattan Distance\n");
-	printf("4. Conflct\n");
+	printf("4. Manhattan Distance + Conflict\n");
+	printf("5. Smoothing Manhattan Distance\n");
+	printf("6. Smoothing Manhattan Distance + Conflict\n");
+
 	printf("> ");
 	scanf("%d", &sh);
 	printf("\n");
@@ -70,25 +73,31 @@ void Input(int ary[4][4]){
 
 	switch (sb) {
 	case 1:
-		in = fopen("C:\\Users\\wogus\\Downloads\\A_STAR\\input1.txt", "r");
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input1.txt", "r");
 		break;
 	case 2:
-		in = fopen("C:\\Users\\wogus\\Downloads\\A_STAR\\input2.txt", "r");	
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input2.txt", "r");
 		break;
 	case 3:
-		in = fopen("C:\\Users\\wogus\\Downloads\\A_STAR\\input3.txt", "r");	
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input3.txt", "r");
 		break;
 	case 4:
-		in = fopen("C:\\Users\\wogus\\Downloads\\A_STAR\\input4.txt", "r");
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input4.txt", "r");
 		break;
 	case 5:
-		in = fopen("C:\\Users\\wogus\\Downloads\\A_STAR\\input5.txt", "r");
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input5.txt", "r");
 		break;
 	case 6:
-		in = fopen("C:\\Users\\wogus\\Downloads\\A_STAR\\input6.txt", "r");
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input6.txt", "r");
+		break;
+	case 7:
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input7.txt", "r");
+		break;
+	case 8:
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input8.txt", "r");
 		break;
 	default:
-		in = fopen("C:\\Users\\wogus\\Downloads\\A_STAR\\input1.txt", "r");
+		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input1.txt", "r");
 	}
 
 
@@ -103,8 +112,11 @@ void Input(int ary[4][4]){
 }
 
 float CalcFnValue(Node *node){
-	int i, j, count = 0, temp_dist=0, dist_sum=0, num, dist, temp[10];
-	float fnvalue;
+	int i, j,  temp_dist=0, dist_sum=0, num, dist, temp[10];
+	float fnvalue, count=0;
+
+	int SMOOTING_CONST = 4;
+	int CONCLICT_CONST = 2;
 
 	// 제 위치에 있지 않은 조각의 수를 모두 더한 값을 장래 비용(h(n))으로 사용
 	for(i=0;i<4;i++){  
@@ -129,13 +141,24 @@ float CalcFnValue(Node *node){
 				count += dist;
 				break;
 			case 4:
-				// Confilct
+				// Conflict
 				num = node->element[i][j];
 				dist = abs(cord[num][0] - i) + abs(cord[num][1] - j);
-				temp[0] = 2 * (i < 3 && node->element[i][j] == node->element[i + 1][j] + 4);
-				temp[1] = 2 * (j < 3 && node->element[i][j] == node->element[i][j + 1] + 1);
+				temp[0] = CONCLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
+				temp[1] = CONCLICT_CONST * (j < 3 && cord[num][1] == j && node->element[i][j] == node->element[i][j + 1] + 1);
 				count += dist + temp[0] + temp[1];
 				break;
+			case 5:
+				num = node->element[i][j];
+				dist = (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j))) * SMOOTING_CONST;
+				count += dist;
+				break;
+			case 6:
+				num = node->element[i][j];
+				dist = (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j))) * SMOOTING_CONST;
+				temp[0] = CONCLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
+				temp[1] = CONCLICT_CONST * (j < 3 && cord[num][1] == j && node->element[i][j] == node->element[i][j + 1] + 1);
+				count += dist + temp[0] + temp[1];
 			default : 
 				if (node->element[i][j] != SS[i][j]) {
 					count++;
