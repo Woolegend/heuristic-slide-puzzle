@@ -28,7 +28,7 @@ int cord[17][2] = {{3,3},{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{
 // 보드를 선택하기 위한 함수
 // 선택된 보드의 번호는 전역변수 sb에 저장된다
 void selectBoard() {
-	printf("Board level : 1 ~ 8\n");
+	printf("Board level : 1 ~ 7\n");
 	printf("> ");
 	scanf("%d", &sb);
 	printf("\n");
@@ -73,31 +73,28 @@ void Input(int ary[4][4]){
 
 	switch (sb) {
 	case 1:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input1.txt", "r");
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input1.txt", "r");
 		break;
 	case 2:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input2.txt", "r");
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input2.txt", "r");
 		break;
 	case 3:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input3.txt", "r");
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input3.txt", "r");
 		break;
 	case 4:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input4.txt", "r");
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input4.txt", "r");
 		break;
 	case 5:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input5.txt", "r");
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input5.txt", "r");
 		break;
 	case 6:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input6.txt", "r");
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input6.txt", "r");
 		break;
 	case 7:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input7.txt", "r");
-		break;
-	case 8:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input8.txt", "r");
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input7.txt", "r");
 		break;
 	default:
-		in = fopen("C:\\Users\\410-28\\Desktop\\slide_puzzle\\heuristic-slide-puzzle-main\\resource\\input1.txt", "r");
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input5.txt", "r");
 	}
 
 
@@ -141,7 +138,7 @@ float CalcFnValue(Node *node){
 				count += dist;
 				break;
 			case 4:
-				// Conflict
+				// Manhattan Distance + Conflict
 				num = node->element[i][j];
 				dist = abs(cord[num][0] - i) + abs(cord[num][1] - j);
 				temp[0] = CONCLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
@@ -149,11 +146,13 @@ float CalcFnValue(Node *node){
 				count += dist + temp[0] + temp[1];
 				break;
 			case 5:
+				// Smoothing Manhattan Distance
 				num = node->element[i][j];
 				dist = (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j))) * SMOOTING_CONST;
 				count += dist;
 				break;
 			case 6:
+				// Smoothing Manhattan Distance + Conflict
 				num = node->element[i][j];
 				dist = (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j))) * SMOOTING_CONST;
 				temp[0] = CONCLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
