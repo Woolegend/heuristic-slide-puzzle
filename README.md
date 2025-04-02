@@ -11,7 +11,7 @@
 
  프로젝트 폴더 루트 경로에 레포지토리 클론
  ```
- gir clone https://github.com/Woolegend/heuristic-slide-puzzle.git
+ git clone https://github.com/Woolegend/heuristic-slide-puzzle.git
  ```
 
 git이 안 깔려있다면 .zip으로 코드를 다운받은 뒤 프로젝트 폴더에 압축 해제
