@@ -112,15 +112,16 @@ float CalcFnValue(Node *node){
 	int i, j,  temp_dist=0, dist_sum=0, num, dist, temp[10];
 	float fnvalue, count=0;
 
+	// 필요에 따라 상수를 변경하세요
 	int SMOOTING_CONST = 4;
-	int CONCLICT_CONST = 2;
+	int CONCLICT_CONST = 4;
 
-	// 제 위치에 있지 않은 조각의 수를 모두 더한 값을 장래 비용(h(n))으로 사용
 	for(i=0;i<4;i++){  
 		for(j=0;j<4;j++){
 			switch (sh) {
 			case 1 :
 				// Miss Match
+				// 제 위치에 있지 않은 조각의 수를 모두 더한 값을 장래 비용(h(n))으로 사용
 				if (node->element[i][j] != SS[i][j]) {
 					count++;
 				}
@@ -148,13 +149,13 @@ float CalcFnValue(Node *node){
 			case 5:
 				// Smoothing Manhattan Distance
 				num = node->element[i][j];
-				dist = (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j))) * SMOOTING_CONST;
+				dist = SMOOTING_CONST * (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j)));
 				count += dist;
 				break;
 			case 6:
 				// Smoothing Manhattan Distance + Conflict
 				num = node->element[i][j];
-				dist = (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j))) * SMOOTING_CONST;
+				dist = SMOOTING_CONST * (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j)));
 				temp[0] = CONCLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
 				temp[1] = CONCLICT_CONST * (j < 3 && cord[num][1] == j && node->element[i][j] == node->element[i][j + 1] + 1);
 				count += dist + temp[0] + temp[1];
