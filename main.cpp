@@ -28,7 +28,7 @@ int cord[17][2] = {{3,3},{0,0},{0,1},{0,2},{0,3},{1,0},{1,1},{1,2},{1,3},{2,0},{
 // 보드를 선택하기 위한 함수
 // 선택된 보드의 번호는 전역변수 sb에 저장된다
 void selectBoard() {
-	printf("Board level : 1 ~ 7\n");
+	printf("Board level : 1 ~ 10\n");
 	printf("> ");
 	scanf("%d", &sb);
 	printf("\n");
@@ -59,6 +59,7 @@ void selectHeuristic() {
 	printf("4. Manhattan Distance + Conflict\n");
 	printf("5. Smoothing Manhattan Distance\n");
 	printf("6. Smoothing Manhattan Distance + Conflict\n");
+	printf("7. Smoothing Manhattan Distance + Conflict + Corner Tile Panalty\n");
 
 	printf("> ");
 	scanf("%d", &sh);
@@ -93,6 +94,15 @@ void Input(int ary[4][4]){
 	case 7:
 		in = fopen("..\\heuristic-slide-puzzle\\resource\\input7.txt", "r");
 		break;
+	case 8:
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input8.txt", "r");
+		break;
+	case 9:
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input9.txt", "r");
+		break;
+	case 10:
+		in = fopen("..\\heuristic-slide-puzzle\\resource\\input10.txt", "r");
+		break;
 	default:
 		in = fopen("..\\heuristic-slide-puzzle\\resource\\input5.txt", "r");
 	}
@@ -109,12 +119,13 @@ void Input(int ary[4][4]){
 }
 
 float CalcFnValue(Node *node){
-	int i, j,  temp_dist=0, dist_sum=0, num, dist, temp[10];
+	int i, j,  temp_dist=0, dist_sum=0, num, dist, temp[10], corner_conflict = 0;
 	float fnvalue, count=0;
 
 	// 필요에 따라 상수를 변경하세요
 	int SMOOTING_CONST = 4;
-	int CONCLICT_CONST = 4;
+	int CONFLICT_CONST = 2;
+	int CORNER_PANALTY_CONST = 1;
 
 	for(i=0;i<4;i++){  
 		for(j=0;j<4;j++){
@@ -142,8 +153,8 @@ float CalcFnValue(Node *node){
 				// Manhattan Distance + Conflict
 				num = node->element[i][j];
 				dist = abs(cord[num][0] - i) + abs(cord[num][1] - j);
-				temp[0] = CONCLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
-				temp[1] = CONCLICT_CONST * (j < 3 && cord[num][1] == j && node->element[i][j] == node->element[i][j + 1] + 1);
+				temp[0] = CONFLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
+				temp[1] = CONFLICT_CONST * (j < 3 && cord[num][1] == j && node->element[i][j] == node->element[i][j + 1] + 1);
 				count += dist + temp[0] + temp[1];
 				break;
 			case 5:
@@ -155,16 +166,33 @@ float CalcFnValue(Node *node){
 			case 6:
 				// Smoothing Manhattan Distance + Conflict
 				num = node->element[i][j];
-				dist = SMOOTING_CONST * (sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j)));
-				temp[0] = CONCLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
-				temp[1] = CONCLICT_CONST * (j < 3 && cord[num][1] == j && node->element[i][j] == node->element[i][j + 1] + 1);
+				dist = SMOOTING_CONST + ceil(sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j)));
+				temp[0] = CONFLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
+				temp[1] = CONFLICT_CONST * (j < 3 && cord[num][1] == j && node->element[i][j] == node->element[i][j + 1] + 1);
 				count += dist + temp[0] + temp[1];
-			default : 
+			case 7:
+				// Smoothing Manhattan Distance + Conflict + Corner Tile Penalty
+				num = node->element[i][j];
+				dist = SMOOTING_CONST * ceil(sqrt(abs(cord[num][0] - i) + abs(cord[num][1] - j)));
+				temp[0] = CONFLICT_CONST * (i < 3 && cord[num][0] == i && node->element[i][j] == node->element[i + 1][j] + 4);
+				temp[1] = CONFLICT_CONST * (j < 3 && cord[num][1] == j && node->element[i][j] == node->element[i][j + 1] + 1);
+				if (node->element[0][0] != SS[0][0]) corner_conflict++;
+				if (node->element[0][3] != SS[0][3]) corner_conflict++;
+				if (node->element[3][0] != SS[3][0]) corner_conflict++;
+				count += dist + temp[0] + temp[1];
+			default:
 				if (node->element[i][j] != SS[i][j]) {
 					count++;
 				}
 			}
 		}
+	}
+
+	if (sh == 7) {
+		if (node->element[0][0] != SS[0][0]) corner_conflict++;
+		if (node->element[0][3] != SS[0][3]) corner_conflict++;
+		if (node->element[3][0] != SS[3][0]) corner_conflict++;
+		count += CORNER_PANALTY_CONST * corner_conflict;
 	}
 
 	switch (sa) {
